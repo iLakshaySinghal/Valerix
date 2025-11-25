@@ -1,0 +1,107 @@
+##############################
+#        Root / General      #
+##############################
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS trash
+.DS_Store
+Thumbs.db
+
+
+##############################
+#        Environment         #
+##############################
+
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.env.*
+
+
+##############################
+#         Next.js            #
+##############################
+
+.next/
+out/
+dist/
+.cache/
+.vercel/
+
+
+##############################
+#         Backend            #
+##############################
+
+# Build directories
+backend/dist/
+backend/tmp/
+backend/temp/
+backend/.tmp/
+
+# Local uploads (if any)
+uploads/
+public/uploads/
+
+# Mongo dumps
+dump/
+
+
+##############################
+#      Frontend / App        #
+##############################
+
+# Next build
+frontend/.next/
+frontend/out/
+frontend/dist/
+
+# Node modules
+frontend/node_modules/
+
+# Cache
+frontend/.cache/
+frontend/.turbo/
+
+
+##############################
+#       IDE / Editor         #
+##############################
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+##############################
+#      Misc. / Security      #
+##############################
+
+*.pid
+*.seed
+*.pid.lock
+*.pem
+*.key
+
+##############################
+# For safety
+##############################
+
+# Uploaded assets from ChatGPT
+# (Your image)
+mnt/data/1712f7cc-140d-445a-b18d-161ec250c6f1.png
