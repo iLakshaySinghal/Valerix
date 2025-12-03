@@ -1,6 +1,6 @@
 // src/pages/startup/StartupDashboard.jsx
 import React, { useEffect, useState } from "react";
-import api from "../../utils/api";
+import { getStartupStats } from "../../api/startup";
 
 export default function StartupDashboard() {
   const [stats, setStats] = useState({
@@ -18,7 +18,7 @@ export default function StartupDashboard() {
 
   async function loadStats() {
     try {
-      const res = await api.get("/startup/stats");
+      const res = await getStartupStats();
       setStats(res.data || {});
     } catch (err) {
       console.error("Startup stats failed:", err);

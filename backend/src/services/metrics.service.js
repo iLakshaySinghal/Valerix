@@ -2,6 +2,7 @@ const InventoryItem = require("../models/InventoryItem");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Category = require("../models/Category");
+const User = require("../models/User");
 
 class MetricsService {
 
@@ -124,19 +125,41 @@ class MetricsService {
       .populate("productId", "name price startup")
       .lean();
 
-    const inventory = await MetricsService.inventoryKPIs();
+    const inventoryKpis = await MetricsService.inventoryKPIs();
+
+    // Global user metrics
+    const totalUsers = await User.countDocuments({ role: "user" });
+    const totalStartups = await User.countDocuments({ role: "startup" });
 
     return {
+      // Flattened summary used by AdminDashboard.jsx
       totalRevenue,
       totalOrders,
       avgOrderValue,
-      salesByDay,
-      ordersByDay,
-      monthlyRevenue,
-      categoryBreakdown,
-      inventory,
-      lowStockCount: lowStockItems.length,
-      lowStockItems,
+      totalUsers,
+      totalStartups,
+
+      // Structured sections used by AdminMetrics.jsx
+      sales: {
+        totalRevenue,
+        totalOrders,
+        avgOrderValue,
+        salesByDay,
+        ordersByDay,
+        monthlyRevenue,
+        categoryBreakdown,
+      },
+      inventory: {
+        ...inventoryKpis,
+        lowStockCount: lowStockItems.length,
+        lowStockItems,
+      },
+      traffic: {
+        // Placeholder values – hook these up to real analytics if available
+        pageViews: 0,
+        uniqueVisitors: 0,
+        avgSessionDuration: 0,
+      },
     };
   }
 }

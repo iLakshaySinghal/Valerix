@@ -11,9 +11,9 @@ export const adminGetInventory = (params = {}) =>
 export const adminUpdateInventory = (payload) =>
   api.post("/admin/inventory/update", payload);
 
-// PRODUCTS (admin view)
+// PRODUCTS (admin view) – uses same /api/products endpoints as startup/admin
 export const adminGetProducts = (params = {}) =>
-  api.get("/products", { params }); // adjust to /admin/products if you add that
+  api.get("/products", { params });
 
 export const adminCreateProduct = (payload) =>
   api.post("/products", payload);
@@ -25,8 +25,9 @@ export const adminDeleteProduct = (id) =>
   api.delete(`/products/${id}`);
 
 // ORDERS
+// Backend admin list route: GET /api/orders/admin/all
 export const adminGetOrders = (params = {}) =>
-  api.get("/orders/admin", { params }); // make sure backend supports this
+  api.get("/orders/admin/all", { params });
 
 export const adminUpdateOrderStatus = (id, status) =>
   api.put(`/orders/${id}/status`, { status });

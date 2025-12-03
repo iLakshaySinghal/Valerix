@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 export default function Checkout() {
   const [addressId, setAddressId] = useState("");
   const [loading, setLoading] = useState(false);
-  const { cart } = useCartStore();
+  const { cart, clearCart } = useCartStore();
   const nav = useNavigate();
 
   const total = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
@@ -21,22 +21,19 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      // Create order
+      // Backend uses cart + addressId + paymentMethod; items are optional here
       const res = await api.post("/orders", {
-        items: cart.map((i) => ({
-          productId: i.productId,
-          quantity: i.qty,
-        })),
         addressId,
         paymentMethod: "online",
       });
 
       const orderId = res.data.order?._id || res.data._id;
 
-      // Pay
+      // Pay via payment routes
       await api.post(`/payment/${orderId}/pay`);
 
       alert("Payment successful! Invoice generated.");
+      await clearCart();
       nav("/user/orders");
     } catch (e) {
       console.error(e);

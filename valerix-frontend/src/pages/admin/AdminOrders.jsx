@@ -1,6 +1,6 @@
 // src/pages/admin/AdminOrders.jsx
 import React, { useEffect, useState } from "react";
-import api from "../../utils/api";
+import { adminGetOrders, adminUpdateOrderStatus } from "../../api/admin";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -15,10 +15,10 @@ export default function AdminOrders() {
   async function loadOrders() {
     setLoading(true);
     try {
-      const res = await api.get("/admin/orders", {
-        params: statusFilter === "all" ? {} : { status: statusFilter },
-      });
-      setOrders(res.data.orders || res.data || []);
+      const res = await adminGetOrders(
+        statusFilter === "all" ? {} : { status: statusFilter }
+      );
+      setOrders(res.data.orders || []);
     } catch (err) {
       console.error(err);
       alert("Failed to load orders");
@@ -30,7 +30,7 @@ export default function AdminOrders() {
   async function updateStatus(id, newStatus) {
     setSavingStatus(id);
     try {
-      await api.put(`/admin/orders/${id}/status`, { status: newStatus });
+      await adminUpdateOrderStatus(id, newStatus);
       await loadOrders();
     } catch (err) {
       console.error(err);

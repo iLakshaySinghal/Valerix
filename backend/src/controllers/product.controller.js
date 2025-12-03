@@ -1,10 +1,14 @@
 const ProductService = require("../services/product.service.js");
 
 /**
- * Create product (no startup logic)
+ * Create product (Requires startup/owner ID)
  */
 exports.createProduct = async (req, res, next) => {
   try {
+    // FIX 1: Inject the startup/owner ID into the body before calling the service
+    // This allows the single-argument ProductService.createProduct(data) to work.
+    req.body.startup = req.user.id; 
+    
     const product = await ProductService.createProduct(req.body);
     res.status(201).json({ success: true, product });
   } catch (err) {
@@ -29,11 +33,20 @@ exports.getProduct = async (req, res, next) => {
 };
 
 /**
- * Update product (no startup validation)
+ * Update product (Must pass requester identity for ownership validation)
  */
 exports.updateProduct = async (req, res, next) => {
   try {
-    const product = await ProductService.updateProduct(req.params.id, req.body);
+    // FIX 2: Define requester identity for ownership check in service layer
+    const requesterId = req.user.id;
+    const isAdmin = req.user.role === "admin";
+    
+    // NOTE: This assumes ProductService.updateProduct has been modified to accept requesterId and options.
+    const product = await ProductService.updateProduct(
+      req.params.id, 
+      req.body, // The updates
+      { requesterId, isAdmin } // Passing identity details
+    );
     res.json({ success: true, product });
   } catch (err) {
     next(err);
@@ -41,11 +54,19 @@ exports.updateProduct = async (req, res, next) => {
 };
 
 /**
- * Delete product (soft delete)
+ * Delete product (soft delete with ownership check)
  */
 exports.deleteProduct = async (req, res, next) => {
   try {
-    const product = await ProductService.deleteProduct(req.params.id);
+    // FIX 3: Define requester identity for ownership check in service layer
+    const requesterId = req.user.id;
+    const isAdmin = req.user.role === "admin";
+
+    // NOTE: This assumes ProductService.deleteProduct has been modified to accept requesterId and options.
+    const product = await ProductService.deleteProduct(
+      req.params.id,
+      { requesterId, isAdmin } // Passing identity details
+    );
     res.json({ success: true, message: "Product deleted", product });
   } catch (err) {
     next(err);

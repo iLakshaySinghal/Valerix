@@ -1,7 +1,10 @@
-import client from "./client";
+import api from "../utils/api";
 
-export const fetchProducts = (params) => client.get("/products", { params });
-export const fetchProduct = (id) => client.get(`/products/${id}`);
-export const createProduct = (data) => client.post("/startup/products", data);
-export const updateProduct = (id, data) => client.put(`/startup/products/${id}`, data);
-export const deleteProduct = (id) => client.delete(`/startup/products/${id}`);
+// Public catalogue
+export const fetchProducts = (params) => api.get("/products", { params });
+export const fetchProduct = (id) => api.get(`/products/${id}`);
+
+// Authenticated CRUD (admin + startup) – uses /api/products routes
+export const createProduct = (data) => api.post("/products", data);
+export const updateProduct = (id, data) => api.put(`/products/${id}`, data);
+export const deleteProduct = (id) => api.delete(`/products/${id}`);

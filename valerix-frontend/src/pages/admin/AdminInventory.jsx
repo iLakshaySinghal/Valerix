@@ -1,6 +1,6 @@
 // src/pages/admin/AdminInventory.jsx
 import React, { useEffect, useState } from "react";
-import api from "../../utils/api";
+import { adminGetInventory, adminUpdateInventory } from "../../api/admin";
 
 export default function AdminInventory() {
   const [items, setItems] = useState([]);
@@ -17,10 +17,8 @@ export default function AdminInventory() {
   async function load() {
     setLoading(true);
     try {
-      const res = await api.get("/admin/inventory", {
-        params: { q: query },
-      });
-      setItems(res.data.items || res.data || []);
+      const res = await adminGetInventory({ q: query });
+      setItems(res.data.items || []);
     } catch (err) {
       console.error(err);
       alert("Failed to load inventory");
@@ -36,14 +34,14 @@ export default function AdminInventory() {
     }
 
     try {
-      let payload = { productId: selected._id };
+      let payload = { productId: selected.product.id };
 
       if (operation === "set") {
         payload.quantity = Number(delta);
-        await api.post("/admin/inventory/set", payload);
+        await adminUpdateInventory(payload); // backend treats quantity as absolute via set route
       } else {
         payload.delta = operation === "add" ? Number(delta) : -Number(delta);
-        await api.post("/admin/inventory/update", payload);
+        await adminUpdateInventory(payload);
       }
 
       alert("Inventory updated");
@@ -110,32 +108,32 @@ export default function AdminInventory() {
                   </td>
                 </tr>
               ) : (
-                items.map((p) => (
+                items.map((inv) => (
                   <tr
-                    key={p._id}
+                    key={inv.productId}
                     className="border-b border-pink-500/10 hover:bg-white/5 transition"
                   >
-                    <td className="px-3 py-2 text-pink-100">{p.name}</td>
+                    <td className="px-3 py-2 text-pink-100">{inv.product?.name}</td>
 
                     <td className="px-3 py-2 text-pink-200/80">
-                      {p.startupDetails?.name || "N/A"}
+                      {inv.startupName || "N/A"}
                     </td>
 
                     <td className="px-3 py-2 text-pink-300 font-semibold">
-                      {p.stock}
+                      {inv.quantity}
                     </td>
 
                     <td className="px-3 py-2 text-pink-200/80">
-                      {p.salesCount || 0}
+                      {inv.product?.salesCount || 0}
                     </td>
 
                     <td className="px-3 py-2 text-pink-300">
-                      ₹{p.price}
+                      ₹{inv.product?.price}
                     </td>
 
                     <td className="px-3 py-2">
                       <button
-                        onClick={() => setSelected(p)}
+                        onClick={() => setSelected(inv)}
                         className="px-3 py-1 text-[11px] rounded-lg 
                                    bg-pink-500/20 border border-pink-400/40 
                                    text-pink-200 hover:bg-pink-500/30"

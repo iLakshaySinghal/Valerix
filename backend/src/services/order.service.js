@@ -26,11 +26,14 @@ class OrderService {
     // 2. Validate address
     const address = await Address.findOne({
       _id: addressId,
-      userId
+      user: userId 
     }).lean();
 
     if (!address) throw new Error("Invalid address");
 
+    // NEW: Format the full address string for the Order model's required 'address' field
+    const fullAddress = `${address.line1}${address.line2 ? ', ' + address.line2 : ''}, ${address.city}, ${address.state} - ${address.pincode}, ${address.country || 'India'}`;
+    
     // 3. User profile snapshot
     const profile = await Profile.findOne({ userId }).lean();
 
@@ -42,8 +45,8 @@ class OrderService {
       address: {
         name: address.name,
         phone: address.phone,
-        addressLine1: address.addressLine1,
-        addressLine2: address.addressLine2,
+        addressLine1: address.line1,
+        addressLine2: address.line2,
         city: address.city,
         state: address.state,
         pincode: address.pincode
@@ -61,29 +64,47 @@ class OrderService {
 
       if (!product) throw new Error("Product not found");
 
+      // FIX FOR ownerId: Retrieve ID and check data integrity
+      let itemOwnerId;
+      if (product.startup && typeof product.startup === 'object') {
+          // Case 1: Successfully populated (object with _id)
+          itemOwnerId = product.startup._id;
+      } else if (product.startup) {
+          // Case 2: Not populated, but contains the raw ObjectId value (less common in modern lean() but safe fallback)
+          itemOwnerId = product.startup;
+      }
+      
+      // CRITICAL CHECK: If ownerId is missing, throw a data integrity error
+      if (!itemOwnerId) {
+          throw new Error(`Product data integrity error: Product ${product._id} is missing its required startup owner ID. Please fix product data.`);
+      }
+      
       const qty = Number(it.quantity);
       const subtotal = qty * product.price;
       totalAmount += subtotal;
 
       detailedItems.push({
         productId: product._id,
-        name: product.name,
         quantity: qty,
         price: product.price,
-        ownerId: product.startup?._id,
+        ownerId: itemOwnerId, // Use the safely retrieved ownerId
       });
     }
 
+    // CORRECTION 2: Map "online" (frontend value) to "CARD" (backend enum value)
+    const finalPaymentMethod = paymentMethod === 'online' ? 'CARD' : paymentMethod;
+    
     // 5. Create order
     const order = await Order.create({
       userId,
       items: detailedItems,
       totalAmount,
-      paymentMethod,
+      paymentMethod: finalPaymentMethod, // Use corrected enum value
       userDetails: userSnapshot,
       status: "pending",
       invoiceNumber: "",
       transactionId: "",
+      address: fullAddress, // CORRECTION 1: Add the required 'address' path
     });
 
     return order;

@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import api from "../../utils/api";
 import { Link } from "react-router-dom";
-import { useAuthStore } from "../../store/useAuthStore";
+import { startupGetProducts, startupDeleteProduct } from "../../api/startup";
 
 export default function StartupProducts() {
-  const { user } = useAuthStore();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,11 +13,8 @@ export default function StartupProducts() {
   async function loadProducts() {
     setLoading(true);
     try {
-      const res = await api.get("/products", {
-        params: { startup: user.id },
-      });
-
-      setProducts(res.data.items || []);
+      const res = await startupGetProducts();
+      setProducts(res.data.products || []);
     } catch (err) {
       console.error("Failed to load products:", err);
     } finally {
@@ -31,7 +26,7 @@ export default function StartupProducts() {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      await api.delete(`/products/${id}`);
+      await startupDeleteProduct(id);
       loadProducts();
     } catch (err) {
       console.error(err);

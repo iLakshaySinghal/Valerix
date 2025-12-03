@@ -4,7 +4,7 @@ import { useCartStore } from "../../store/cartStore";
 import { Link } from "react-router-dom";
 
 export default function Cart() {
-  const { cart, loadCart, addToCart, remove } = useCartStore();
+  const { cart, loadCart, updateQuantity, remove } = useCartStore();
 
   useEffect(() => {
     loadCart();
@@ -32,7 +32,7 @@ export default function Cart() {
               {/* Decrease */}
               <button
                 onClick={() =>
-                  addToCart(item.productId, item.qty - 1)
+                  updateQuantity(item.productId, Math.max(1, item.qty - 1))
                 }
                 className="px-2 py-1 bg-emerald-500 text-black rounded"
               >
@@ -44,7 +44,7 @@ export default function Cart() {
               {/* Increase */}
               <button
                 onClick={() =>
-                  addToCart(item.productId, item.qty + 1)
+                  updateQuantity(item.productId, item.qty + 1)
                 }
                 className="px-2 py-1 bg-emerald-500 text-black rounded"
               >

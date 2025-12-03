@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const Category = require("../models/Category");
 const slugify = require("slugify");
 const mongoose = require("mongoose");
+const InventoryService = require("./inventory.service"); // <--- ADDED IMPORT
 
 class ProductService {
 
@@ -35,6 +36,10 @@ class ProductService {
 
     // -------- Create product --------
     const product = await Product.create(data);
+    
+    // CRITICAL FIX: Initialize Inventory Item
+    await InventoryService.ensureInventoryForProduct(product._id); 
+    
     return product.toObject();
   }
 

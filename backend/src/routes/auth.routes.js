@@ -1,14 +1,14 @@
 const router = require("express").Router();
 const { authLimiter } = require("../middlewares/rateLimiter");
 const authJwt = require("../middlewares/authJwt");
-const { signup, login, verifyLoginOTP, me } = require("../controllers/auth.controller");
+const { signup, login, verifyLoginOTP, me, signupStartup } = require("../controllers/auth.controller"); // <--- ADDED signupStartup to imports
 
-// Signup (no rate limit needed, optional)
-router.post("/signup", signup);              // normal user
-router.post("/startup-signup", (req, res, next) => {
-  req.body.role = "startup";
-  signup(req, res, next);
-});
+// Signup (for normal users only, handled by general signup controller)
+router.post("/signup", signup);
+
+// Startup Signup: CORRECTED to use the dedicated signupStartup controller
+router.post("/startup-signup", signupStartup); // <--- FIX: Use the dedicated controller
+
 // Login: Step 1 (password → send OTP)
 router.post("/login", authLimiter, login);
 

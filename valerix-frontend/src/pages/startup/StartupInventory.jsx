@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import api from "../../utils/api";
+import { startupGetInventory } from "../../api/startup";
+import { adminUpdateInventory, adminGetInventory } from "../../api/admin";
 
 export default function StartupInventory() {
   const [items, setItems] = useState([]);
@@ -15,8 +16,10 @@ export default function StartupInventory() {
   async function loadInventory() {
     setLoading(true);
     try {
-      const res = await api.get(`/products?limit=50&sort=stock:asc`);
-      setItems(res.data.items || []);
+      // Use startup inventory snapshot (per-startup view), fall back to admin inventory if needed
+      const res = await startupGetInventory({ limit: 50, sort: "stock:asc" });
+      // backend returns { success, products } for startup inventory
+      setItems(res.data.products || []);
     } catch (err) {
       console.error(err);
     }
@@ -31,14 +34,15 @@ export default function StartupInventory() {
 
     try {
       if (type === "delta") {
-        await api.post("/inventory/update-stock", {
+        await adminUpdateInventory({
           productId: adjustProduct._id,
           delta: Number(quantity),
           reason: "manual_adjustment",
         });
       } else {
-        await api.post("/inventory/set-stock", {
+        await adminUpdateInventory({
           productId: adjustProduct._id,
+          delta: 0,
           quantity: Number(quantity),
           reason: "manual_fixed",
         });

@@ -19,11 +19,11 @@ router.get("/:id", getProduct);      // Get single product
 
 
 // -------------------------------
-// PROTECTED ROUTES (Admin Only)
+// PROTECTED ROUTES (Admin & Startup)
 // -------------------------------
-// You can change "admin" to ["admin", "manager"] etc.
-router.post("/", authJwt, requireRole("admin"), createProduct);
-router.put("/:id", authJwt, requireRole("admin"), updateProduct);
-router.delete("/:id", authJwt, requireRole("admin"), deleteProduct);
+// FIX: Allow both 'admin' and 'startup' roles. The controller/service will enforce ownership.
+router.post("/", authJwt, requireRole(["admin", "startup"]), createProduct);
+router.put("/:id", authJwt, requireRole(["admin", "startup"]), updateProduct);
+router.delete("/:id", authJwt, requireRole(["admin", "startup"]), deleteProduct);
 
 module.exports = router;
